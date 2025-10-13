@@ -1,0 +1,23 @@
+﻿# Dependencies
+node_modules/
+.expo/
+.expo-shared/
+android/
+ios/
+
+# Builds
+dist/
+build/
+
+# Env & local
+.env*
+*.local
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
