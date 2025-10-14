@@ -77,7 +77,7 @@ export default function SignupStudentScreen({ navigation }) {
       const uid = user.uid;
 
       // 2) Firestore — DOĞRU PATH: students/{uid}
-      const studentDoc = {
+      /*const studentDoc = {
         uid,
         role: 'student',
         firstName: F,
@@ -87,8 +87,8 @@ export default function SignupStudentScreen({ navigation }) {
         department: dept,
         email: E,
         createdAt: serverTimestamp(),
-      };
-      await setDoc(doc(db, 'students', uid), studentDoc);
+      };*/
+     // await setDoc(doc(db, 'students', uid), studentDoc);
           await saveStudent(user.uid, {
       firstName: F,
       lastName: L,

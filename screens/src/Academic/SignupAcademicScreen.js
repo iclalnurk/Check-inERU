@@ -70,7 +70,7 @@ export default function SignupAcademicScreen({ navigation }) {
   department: dept,
   email: E,
 });
-      await setDoc(doc(db, 'users_academics', uid), {
+     /* await setDoc(doc(db, 'users_academics', uid), {
         uid,
         role: 'academic',
         firstName: F,
@@ -80,7 +80,7 @@ export default function SignupAcademicScreen({ navigation }) {
         department: dept,
         email: E,
         createdAt: serverTimestamp(),
-      });
+      });*/
 
       Alert.alert('Başarılı', 'Akademisyen kaydı oluşturuldu.');
       navigation.replace('LoginAcademic');

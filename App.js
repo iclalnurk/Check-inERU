@@ -16,7 +16,8 @@ import LoginAcademicScreen from './screens/src/Academic/LoginAcademicScreen';
 import SignupAcademicScreen from './screens/src/Academic/SignupAcademicScreen';
 import RoleSelectScreen from './screens/src/RoleSelectScreen';
 import HomeScreen from './screens/src/HomeScreen';
-
+import StudentHome from './screens/src/student/StudentHome';
+import AcademicHome from './screens/src/Academic/AcademicHome';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -30,7 +31,8 @@ export default function App() {
         <Stack.Screen name = "LoginAcademic" component={LoginAcademicScreen} options={{headerShown: false}}/>
         <Stack.Screen name = "SignupAcademic" component={SignupAcademicScreen} options={{headerShown: false}}/>
          <Stack.Screen name = "HomeScreen" component={HomeScreen} options={{headerShown: false}}/>
-
+           <Stack.Screen name = "StudentHome" component={StudentHome} options={{headerShown: false}}/>
+            <Stack.Screen name = "AcademicHome" component={AcademicHome} options={{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
