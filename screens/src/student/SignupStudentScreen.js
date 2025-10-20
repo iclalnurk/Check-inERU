@@ -1,14 +1,30 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState , useEffect,useRef,useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, Alert,
-  StyleSheet, KeyboardAvoidingView, Platform, ScrollView
+  StyleSheet, KeyboardAvoidingView, Platform, ScrollView,Dimensions,Image,
+  Animated,Keyboard,Easing,StatusBar
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFonts } from 'expo-font';
 import { Picker } from '@react-native-picker/picker';
+import * as NavigationBar from 'expo-navigation-bar';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../../firebase';
 import { saveStudent } from '../services/userRepo'; // ← yolunu ayarla
+
+
+const {width ,height}= Dimensions.get('window');
+const NAVY ='#0b1f3b';
+
+const CARD_SIZE         = Math.min(width* 0.73 , 380);
+const FIELD_WIDTH       =Math.min (width * 0.80 , 360);
+const TOP_BIG_H         =CARD_SIZE+28;
+const TOP_SMALL_H       =140;
+const LOGO_MIN_SCALE    =0.52;
+
+
+
 const DEPARTMENTS = [
   'Seçiniz…',
   'Bilgisayar Mühendisliği',
@@ -24,6 +40,39 @@ const DEPARTMENTS = [
 ];
 
 export default function SignupStudentScreen({ navigation }) {
+  const [fontsLoaded]= useFonts ({
+    Helvatica :require('../../../assets/fonts/helvetica.ttf'),
+  });
+  if(!fontsLoaded) return null;
+
+  useEffect(()=> {
+    if(Platform.OS ==='android'){
+      NavigationBar.setButtonStyleAsync('light').catch(() => {});
+    }
+  }, []);
+  // Klavye animasyonu
+  const anim = useRef(new Animated.Value(0)).current;
+  const animateTo = useCallback((to) => {
+    Animated.timing(anim, {
+      toValue: to, duration: 220,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: false,
+    }).start();
+  }, [anim]);
+
+  useEffect(() => {
+    const showEvt = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvt = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const sh = Keyboard.addListener(showEvt, () => animateTo(1));
+    const hd = Keyboard.addListener(hideEvt, () => animateTo(0));
+    return () => { sh.remove(); hd.remove(); };
+  }, [animateTo]);
+
+  const topHeight = anim.interpolate({ inputRange: [0,1], outputRange: [TOP_BIG_H, TOP_SMALL_H] });
+  const logoScale = anim.interpolate({ inputRange: [0,1], outputRange: [1, LOGO_MIN_SCALE] });
+
+
+
   const [firstName, setFirstName] = useState('');
   const [lastName,  setLastName]  = useState('');
   const [studentNo, setStudentNo] = useState('');
@@ -119,7 +168,24 @@ export default function SignupStudentScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={{flex:1}}>
+    <SafeAreaView style={styles.safe}>
+      {/* ÜST status bar beyaz — ikonlar koyu */}
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+       {/* Sol üst rozet */}
+      <Image source={require('../../../assets/Logo1.png')} style={styles.cornerBadge} resizeMode="contain" />
+      
+      {/* Üst beyaz alan — KISALTILDI */}
+      <Animated.View style={[styles.topBox, { height: topHeight }]}>
+        <Animated.View style={[styles.logoCard, { transform: [{ scale: logoScale }], zIndex: 2 }]}>
+          <Image source={require('../../../assets/checkLogo.jpg')} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.circleTitle}>Erciyes Üniversitesi</Text>
+          <Text style={styles.circleSubtitle}>Dijital Yoklama Sistemi</Text>
+        </Animated.View>
+        <View style={styles.shadowEdge} />
+      </Animated.View>
+
+       {/* Form alanı (NAVY) */}
+      <View style={styles.formBackground}>
       <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.wrap}>
@@ -152,41 +218,138 @@ export default function SignupStudentScreen({ navigation }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { 
-    flexGrow: 1, 
-    padding: 24 },
-  wrap:   { 
-    flex: 1, 
-    justifyContent: 'center', 
-    padding: 24 },
-  title:  { 
-    fontSize: 22, 
-    fontWeight: '700', 
-    marginBottom: 12 },
-  input:  { 
-    backgroundColor:'#fff', 
-    borderRadius:10, 
-    padding:12, 
-    marginTop:8 },
-  pickerBox: { 
-    backgroundColor:'#fff', 
-    borderRadius:10, 
-    marginTop:8, 
-    overflow:'hidden' },
-  btn:    { 
-    backgroundColor:'#0782F9', 
-    padding:14, 
-    borderRadius:10, 
-    marginTop:14, 
-    alignItems:'center' },
-  btnDisabled: { 
-    opacity: 0.5 },
-  btnTxt: { 
-    color:'#fff', 
-    fontWeight:'700' },
+  safe: { flex: 1, backgroundColor: '#fff' },
+  formBackground: { flex: 1, backgroundColor: NAVY },
+
+  cornerBadge: {
+    position: 'absolute', top: 8, left: 10, width: 72, height: 72, zIndex: 5,
+  },
+
+  topBox: {
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+
+  // Logo kartı biraz küçültüldü
+  logoCard: {
+    width: CARD_SIZE,
+    height: CARD_SIZE,
+    borderRadius: CARD_SIZE / 2,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.14,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 10,
+  },
+
+  logo: { width: '60%', height: '60%', marginBottom: 0 },
+
+  circleTitle:   { fontFamily: 'Helvetica', fontSize: 22, color: NAVY, marginTop: -14 },
+  circleSubtitle:{ fontFamily: 'Helvetica', fontSize: 16, color: NAVY, marginTop: -8 },
+
+
+title: {
+    fontFamily: 'Helvetica',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 12,
+    textAlign: 'center',     // ← metni ortalar
+    alignSelf: 'center',     // ← Text bileşenini ortalar
+  },
+  shadowEdge: {
+    position: 'absolute',
+    left: 0, right: 0, bottom: -10,
+    height: 20,
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 8,
+    zIndex: 1,
+  },
+
+  formScroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 24,
+  },
+   input: {
+    width: FIELD_WIDTH,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginTop: 8,
+    fontFamily: 'Helvetica',
+    fontSize: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
+  },
+
+  row: {
+    width: FIELD_WIDTH,
+    marginTop: 12,
+    marginBottom: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  rememberTxt: { fontFamily: 'Helvetica', marginLeft: 8, color: '#fff' },
+  resetTxt:    { fontFamily: 'Helvetica', color: '#fff', fontWeight: '700' },
+
+  btn: {
+    width: Math.min(width * 0.80, 360),
+    backgroundColor: '#f3f4f6',
+    paddingVertical: 18,
+    borderRadius: 999,
+    alignItems: 'center',
+    marginVertical: 13,
+  },
+  btnText: { fontFamily: 'Helvetica', color: NAVY, fontWeight: '700', fontSize: 16 },
+
+  linkBtn: { marginTop: 14, alignItems: 'center' },
+  linkTxt: { fontFamily: 'Helvetica', color: '#fff', fontWeight: '700' },
+
+
+
+ // 4) Picker kutusu — genişlik ve merkez
+  pickerBox: {
+    width: FIELD_WIDTH,        // ← kritik
+    alignSelf: 'center',       // ← ortada kalsın
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginTop: 8,
+    overflow: 'hidden',
+    
+  },
+    
+    
+    scroll: { flexGrow: 1, padding: 24 },
+  wrap:   {  alignItems:'center'},
+  //title:  { fontSize: 22, fontWeight: '700', marginBottom: 12 },
+ // input:  { backgroundColor:'#fff', borderRadius:10, padding:12, marginTop:8 },
+  //btn:    { backgroundColor:'#0782F9', padding:14, borderRadius:10, marginTop:14, alignItems:'center' },
+  btnDisabled: { opacity: 0.5 },
+  //btnTxt: { color:'#fff', fontWeight:'700' },
 });

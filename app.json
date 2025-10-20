@@ -1,5 +1,15 @@
 {
   "expo": {
+    "androidNavigationBar": {
+      "visible": "immersive",
+      "backgroundColor": "#0b1f3b",
+      "barStyle": "light-content"
+    },
+    "androidStatusBar": {
+       "translucent": false,
+      "backgroundColor": "#0b1f3b",
+      "barStyle": "light-content"
+    },
     "name": "sinifid",
     "slug": "sinifid",
     "version": "1.0.0",
@@ -8,7 +18,7 @@
     "newArchEnabled": true,
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0b1f3b"
     },
     "ios": {
       "supportsTablet": true

@@ -1,7 +1,8 @@
 // screens/RoleSelectScreen.js
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useFonts } from 'expo-font';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 const NAVY = '#0b1f3b';
@@ -54,13 +55,13 @@ export default function RoleSelectScreen({ navigation }) {
   );
 }
 
-const CARD_SIZE = Math.min(width * 0.78, 340); // kart boyutu sabit (önceki gibi)
+const CARD_SIZE      = Math.min(width * 0.85, 300);  // önce 0.80 / 360'tı
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: NAVY },
 
   cornerBadge: {
     position: 'absolute',
-    top: 8,
+    top: 10,
     left: 10,
     width: 80,
     height: 80,
@@ -70,8 +71,8 @@ const styles = StyleSheet.create({
   topBox: {
     backgroundColor: '#fff',
     alignItems: 'center',
-    paddingTop: 18,
-    paddingBottom: 18,
+    paddingTop: 15,
+    paddingBottom: 15,
   },
 
   logoCard: {
