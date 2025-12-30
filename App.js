@@ -1,17 +1,19 @@
 // App.js
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View ,Platform} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Platform, View } from 'react-native';
 import 'react-native-gesture-handler';
-import { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useFonts } from 'expo-font';
-import * as NavigationBar from 'expo-navigation-bar';
-// BURAYI EKLEYİN: firebase.js dosyanızı import edin
-import './firebase'; // Eğer firebase.js dosyası App.js ile aynı seviyede değilse, doğru yolu belirtin.
-                       // Örneğin: import './utils/firebase'; veya import '../firebase';
- import { SafeAreaProvider,useSafeAreaInsets  } from 'react-native-safe-area-context';
 
+import { NavigationContainer, useNavigationContainerRef, DefaultTheme } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as NavigationBar from 'expo-navigation-bar';
+import { StatusBar } from 'expo-status-bar';
+
+// Firebase init
+import './firebase';
+
+// Ekranlar
 import LoginStudentScreen from './screens/src/student/LoginStudentScreen';
 import SignupStudentScreen from './screens/src/student/SignupStudentScreen';
 import LoginAcademicScreen from './screens/src/Academic/LoginAcademicScreen';
@@ -20,12 +22,37 @@ import RoleSelectScreen from './screens/src/RoleSelectScreen';
 import HomeScreen from './screens/src/HomeScreen';
 import StudentHome from './screens/src/student/StudentHome';
 import AcademicHome from './screens/src/Academic/AcademicHome';
+import AttandanceScreen from './screens/src/student/AttandanceScreen';
+import ScheduleScreen from './screens/src/student/ScheduleScreen';
+import AttandanceAcademic from './screens/src/Academic/AttandanceAcademic';
+import ScheduleAcademic from './screens/src/Academic/ScheduleAcademic';
+
 const Stack = createNativeStackNavigator();
 const NAVY = '#0b1f3b';
 
-function BottomInsetFill({ color = '#0b1f3b' }) {
+const navTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#ffffff',
+  },
+};
+
+// Alt güvenli alanı aktif sayfaya göre boyar
+function BottomInsetFill({ routeName }) {
   const insets = useSafeAreaInsets();
   if (!insets.bottom) return null;
+
+  const navyRoutes = new Set([
+    'RoleSelect',
+    'LoginStudent',
+    'SignupStudent',
+    'LoginAcademic',
+    'SignupAcademic',
+  ]);
+
+  const color = navyRoutes.has(routeName) ? NAVY : '#ffffff';
+
   return (
     <View
       style={{
@@ -39,44 +66,53 @@ function BottomInsetFill({ color = '#0b1f3b' }) {
     />
   );
 }
+
 export default function App() {
+  const navRef = useNavigationContainerRef();
+  const [currentRoute, setCurrentRoute] = useState('RoleSelect');
+
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      (async () => {
-        // Gizlenmişse geri getir
-        await NavigationBar.setVisibilityAsync('visible');
-        // Arka plan NAVY
-        await NavigationBar.setBackgroundColorAsync(NAVY);
-        // Buton ikonları açık renk
-        await NavigationBar.setButtonStyleAsync('light');
-      })();
-    }
+    if (Platform.OS !== 'android') return;
+    (async () => {
+      try {
+        // Edge-to-edge aktif cihazlarda sadece ikon stilini kontrol et
+        if (NavigationBar.setButtonStyleAsync) {
+          await NavigationBar.setButtonStyleAsync('dark'); // koyu ikonlar
+        }
+      } catch (e) {
+        console.log('NavBar style setup skipped:', e?.message || e);
+      }
+    })();
   }, []);
 
   return (
     <SafeAreaProvider>
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName='RoleSelect' >
-        <Stack.Screen name = "RoleSelect" component={RoleSelectScreen} options={{headerShown: false}} />
-        <Stack.Screen name= "LoginStudent" component={LoginStudentScreen} options= {{headerShown: false}} />
-        <Stack.Screen name = "SignupStudent" component={SignupStudentScreen} options = {{headerShown: false}}/>
-        <Stack.Screen name = "LoginAcademic" component={LoginAcademicScreen} options={{headerShown: false}}/>
-        <Stack.Screen name = "SignupAcademic" component={SignupAcademicScreen} options={{headerShown: false}}/>
-         <Stack.Screen name = "HomeScreen" component={HomeScreen} options={{headerShown: false}}/>
-           <Stack.Screen name = "StudentHome" component={StudentHome} options={{headerShown: false}}/>
-            <Stack.Screen name = "AcademicHome" component={AcademicHome} options={{headerShown: false}}/>
-      </Stack.Navigator>
-       <BottomInsetFill color="#0b1f3b" />
-    </NavigationContainer>
+      {/* Üst StatusBar: beyaz + koyu ikon */}
+      <StatusBar style="dark" backgroundColor="#ffffff" />
+
+      <NavigationContainer
+        ref={navRef}
+        theme={navTheme}
+        onReady={() => setCurrentRoute(navRef.getCurrentRoute()?.name ?? 'RoleSelect')}
+        onStateChange={() => setCurrentRoute(navRef.getCurrentRoute()?.name ?? 'RoleSelect')}
+      >
+        <Stack.Navigator initialRouteName="RoleSelect" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="RoleSelect" component={RoleSelectScreen} />
+          <Stack.Screen name="LoginStudent" component={LoginStudentScreen} />
+          <Stack.Screen name="SignupStudent" component={SignupStudentScreen} />
+          <Stack.Screen name="LoginAcademic" component={LoginAcademicScreen} />
+          <Stack.Screen name="SignupAcademic" component={SignupAcademicScreen} />
+          <Stack.Screen name="HomeScreen" component={HomeScreen} />
+          <Stack.Screen name="StudentHome" component={StudentHome} />
+          <Stack.Screen name="AcademicHome" component={AcademicHome} />
+          <Stack.Screen name ="AttandanceScreen" component={AttandanceScreen}/>
+          <Stack.Screen name ="ScheduleScreen" component={ScheduleScreen}/>
+          <Stack.Screen name ="AttandanceAcademic" component={AttandanceAcademic}/>
+          <Stack.Screen name ="ScheduleAcademic" component={ScheduleAcademic}/>
+        </Stack.Navigator>
+
+        <BottomInsetFill routeName={currentRoute} />
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

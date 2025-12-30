@@ -13,6 +13,7 @@
     "@react-native-picker/picker": "^2.11.2",
     "@react-navigation/native": "^7.1.17",
     "@react-navigation/native-stack": "^7.3.26",
+    "csv-parse": "^6.1.0",
     "expo": "~54.0.12",
     "expo-font": "^14.0.8",
     "expo-linear-gradient": "~15.0.7",
@@ -20,10 +21,12 @@
     "expo-secure-store": "~15.0.7",
     "expo-status-bar": "~3.0.8",
     "firebase": "^12.4.0",
+    "firebase-admin": "^13.5.0",
     "lightningcss": "^1.30.2",
     "react": "19.1.0",
     "react-native": "0.81.4",
     "react-native-gesture-handler": "~2.28.0",
+    "react-native-navigation-bar-color": "^2.0.2",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0"
@@ -31,5 +34,9 @@
   "private": true,
   "devDependencies": {
     "babel-preset-expo": "^11.0.15"
-  }
+  },
+  "description": "<img width=\"406\" height=\"852\" alt=\"image\" src=\"https://github.com/user-attachments/assets/33bee851-d41d-4321-87bd-5dc11e07eaed\" />\r <img width=\"398\" height=\"850\" alt=\"image\" src=\"https://github.com/user-attachments/assets/0ada93c0-7ba0-4013-80d0-503dcd63b546\" />\r <img width=\"400\" height=\"857\" alt=\"image\" src=\"https://github.com/user-attachments/assets/9e1a9115-d5ab-40ec-a7f2-d16b1d3bec63\" />\r <img width=\"403\" height=\"854\" alt=\"image\" src=\"https://github.com/user-attachments/assets/37069f2d-af02-4e87-b7e7-b62c0cd69993\" />\r <img width=\"392\" height=\"861\" alt=\"image\" src=\"https://github.com/user-attachments/assets/9d443d7b-2a73-461b-84f5-15dd49079036\" />\r <img width=\"403\" height=\"862\" alt=\"image\" src=\"https://github.com/user-attachments/assets/860481e9-430f-42cd-839e-c1c0bb831e56\" />",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

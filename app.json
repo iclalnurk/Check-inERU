@@ -1,38 +1,42 @@
 {
   "expo": {
-    "androidNavigationBar": {
-      "visible": "immersive",
-      "backgroundColor": "#0b1f3b",
-      "barStyle": "light-content"
-    },
-    "androidStatusBar": {
-       "translucent": false,
-      "backgroundColor": "#0b1f3b",
-      "barStyle": "light-content"
-    },
     "name": "sinifid",
     "slug": "sinifid",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+
     "newArchEnabled": true,
+
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#0b1f3b"
     },
-    "ios": {
-      "supportsTablet": true
-    },
+
+    "ios": { "supportsTablet": true },
+
     "android": {
       "softwareKeyboardLayoutMode": "resize",
-      "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+      "adaptiveIcon": { "backgroundColor": "#ffffff" }
     },
-    "web": {},
+
+    "androidStatusBar": {
+      "translucent": false,
+      "backgroundColor": "#ffffff",
+      "barStyle": "dark-content"
+    },
+
+    "androidNavigationBar": {
+      "backgroundColor": "#ffffff",
+      "barStyle": "dark-content"
+    
+    },
+
     "plugins": [
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "expo-navigation-bar"
+    ],
+
+    "web": {}
   }
 }

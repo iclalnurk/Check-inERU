@@ -7,7 +7,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { Picker } from '@react-native-picker/picker';
-import * as NavigationBar from 'expo-navigation-bar';    
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../../firebase';
@@ -43,12 +42,6 @@ const [fontsLoaded] = useFonts({
   });
   if (!fontsLoaded) return null;
 
-// **ALT GEZİNME ÇUBUĞU** NAVY olsun (Android)
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      NavigationBar.setButtonStyleAsync('light').catch(()=>{});
-    }
-  }, []);
 
   // Klavye animasyonu
   const anim = useRef(new Animated.Value(0)).current;

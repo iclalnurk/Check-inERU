@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
-import * as NavigationBar from 'expo-navigation-bar';            
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '../../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -81,12 +80,7 @@ export default function LoginAcademicScreen({ navigation }) {
     })();
   }, []);
 
-  // **ALT GEZİNME ÇUBUĞU** NAVY olsun (Android)
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      NavigationBar.setButtonStyleAsync('light').catch(()=>{});
-    }
-  }, []);
+  
 
   // Klavye animasyonu
   const anim = useRef(new Animated.Value(0)).current;

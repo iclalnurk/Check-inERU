@@ -12,7 +12,6 @@ import { auth, db } from '../../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import * as NavigationBar from 'expo-navigation-bar';
 
 const { width } = Dimensions.get('window');
 const NAVY = '#0b1f3b';
@@ -40,16 +39,7 @@ export default function LoginStudentScreen({ navigation }) {
   if (!fontsLoaded) return null;
 
     const insets = useSafeAreaInsets();
-  // Komponent içinde (LoginStudentScreen/LoginAcademicScreen)
-useEffect(() => {
-  if (Platform.OS === 'android') {
-    // Edge-to-edge açıkken arka plan rengi set edilemez; sadece ikon rengi:
-    NavigationBar.setButtonStyleAsync('light').catch(() => {});
-    // İstersen görünürlüğü de garanti altına al:
-    // await NavigationBar.setVisibilityAsync('visible');
-  }
-}, []);
-
+ 
   // Açılışta kayıtlı bilgileri yükle
   useEffect(() => {
     (async () => {

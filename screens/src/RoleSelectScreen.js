@@ -1,14 +1,16 @@
 // screens/RoleSelectScreen.js
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, StatusBar } from 'react-native';
 import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 const NAVY = '#0b1f3b';
 
+const CARD_SIZE = Math.min(width * 0.73, 380);
+const FIELD_WIDTH = Math.min(width * 0.80, 360);
+
 export default function RoleSelectScreen({ navigation }) {
-  // Helvetica’yı yükle
   const [fontsLoaded] = useFonts({
     Helvetica: require('../../assets/fonts/helvetica.ttf'),
   });
@@ -16,7 +18,10 @@ export default function RoleSelectScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Sol üst köşe: küçük Erciyes rozeti (yerinde kalsın) */}
+      {/* ÜST KISIM TAMAMEN BEYAZ — lacivert şerit kaldırıldı */}
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffffff" />
+
+      {/* Sol üst Erciyes rozeti */}
       <Image
         source={require('../../assets/Logo1.png')}
         style={styles.cornerBadge}
@@ -25,29 +30,31 @@ export default function RoleSelectScreen({ navigation }) {
 
       {/* Üst beyaz alan */}
       <View style={styles.topBox}>
-        {/* Dairesel kart (sabit boy), içindeki GÖRSEL ve YAZI büyütüldü */}
         <View style={styles.logoCard}>
           <Image
             source={require('../../assets/checkLogo.jpg')}
-            style={styles.logo}              // <- sadece görseli büyüttük
+            style={styles.logo}
             resizeMode="contain"
           />
-          {/* Dairenin içindeki metin */}
           <Text style={styles.circleTitle}>Erciyes Üniversitesi</Text>
           <Text style={styles.circleSubtitle}>Dijital Yoklama Sistemi</Text>
         </View>
-
-        {/* Beyaz→Lacivert sınırında yumuşak gölge (düz geçiş) */}
         <View style={styles.shadowEdge} />
       </View>
 
-      {/* Alt lacivert alan + butonlar (değişmedi) */}
+      {/* Alt lacivert alan */}
       <View style={styles.bottomBox}>
-        <TouchableOpacity style={[styles.btn, styles.shadow]} onPress={() => navigation.navigate('LoginStudent')}>
+        <TouchableOpacity
+          style={[styles.btn, styles.shadow]}
+          onPress={() => navigation.navigate('LoginStudent')}
+        >
           <Text style={styles.btnText}>Öğrenci</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.btn, styles.shadow]} onPress={() => navigation.navigate('LoginAcademic')}>
+        <TouchableOpacity
+          style={[styles.btn, styles.shadow]}
+          onPress={() => navigation.navigate('LoginAcademic')}
+        >
           <Text style={styles.btnText}>Akademik personel</Text>
         </TouchableOpacity>
       </View>
@@ -55,9 +62,8 @@ export default function RoleSelectScreen({ navigation }) {
   );
 }
 
-const CARD_SIZE      = Math.min(width * 0.85, 300);  // önce 0.80 / 360'tı
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: NAVY },
+  container: { flex: 1, backgroundColor: '#fff' }, // artık tam beyaz, üstte lacivert yok
 
   cornerBadge: {
     position: 'absolute',
@@ -82,7 +88,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    // gölge
     shadowColor: '#000',
     shadowOpacity: 0.18,
     shadowRadius: 18,
@@ -90,14 +95,12 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
 
- 
   logo: { width: '63%', height: '63%', marginBottom: 0 },
 
-  // Dairenin içindeki metinler (Helvetica)
   circleTitle: {
     fontFamily: 'Helvetica',
     fontSize: 25,
-    color: NAVY ,
+    color: NAVY,
     marginTop: -20,
   },
   circleSubtitle: {
@@ -109,7 +112,9 @@ const styles = StyleSheet.create({
 
   shadowEdge: {
     position: 'absolute',
-    left: 0, right: 0, bottom: -10,
+    left: 0,
+    right: 0,
+    bottom: -10,
     height: 20,
     backgroundColor: '#fff',
     borderBottomLeftRadius: 16,

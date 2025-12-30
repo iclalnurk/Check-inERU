@@ -1,29 +1,25 @@
-import React, { useMemo, useState , useEffect,useRef,useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, Alert,
-  StyleSheet, KeyboardAvoidingView, Platform, ScrollView,Dimensions,Image,
-  Animated,Keyboard,Easing,StatusBar
+  StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Dimensions, Image,
+  Animated, Keyboard, Easing, StatusBar
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { Picker } from '@react-native-picker/picker';
-import * as NavigationBar from 'expo-navigation-bar';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../../firebase';
-import { saveStudent } from '../services/userRepo'; // ← yolunu ayarla
+import { saveStudent } from '../services/userRepo'; // ← yolunu doğru tut
 
+const { width } = Dimensions.get('window');
+const NAVY = '#0b1f3b';
 
-const {width ,height}= Dimensions.get('window');
-const NAVY ='#0b1f3b';
-
-const CARD_SIZE         = Math.min(width* 0.73 , 380);
-const FIELD_WIDTH       =Math.min (width * 0.80 , 360);
-const TOP_BIG_H         =CARD_SIZE+28;
-const TOP_SMALL_H       =140;
-const LOGO_MIN_SCALE    =0.52;
-
-
+const CARD_SIZE      = Math.min(width * 0.73, 380);
+const FIELD_WIDTH    = Math.min(width * 0.80, 360);
+const TOP_BIG_H      = CARD_SIZE + 28;
+const TOP_SMALL_H    = 140;
+const LOGO_MIN_SCALE = 0.52;
 
 const DEPARTMENTS = [
   'Seçiniz…',
@@ -40,21 +36,28 @@ const DEPARTMENTS = [
 ];
 
 export default function SignupStudentScreen({ navigation }) {
-  const [fontsLoaded]= useFonts ({
-    Helvatica :require('../../../assets/fonts/helvetica.ttf'),
-  });
-  if(!fontsLoaded) return null;
+  // 1) STATE/REF — her zaman aynı sırada
+  const [firstName, setFirstName] = useState('');
+  const [lastName,  setLastName]  = useState('');
+  const [studentNo, setStudentNo] = useState('');
+  const [dept,      setDept]      = useState(DEPARTMENTS[0]);
+  const [email,     setEmail]     = useState('');
+  const [pass,      setPass]      = useState('');
+  const [busy,      setBusy]      = useState(false);
 
-  useEffect(()=> {
-    if(Platform.OS ==='android'){
-      NavigationBar.setButtonStyleAsync('light').catch(() => {});
-    }
-  }, []);
-  // Klavye animasyonu
   const anim = useRef(new Animated.Value(0)).current;
+
+  // 2) FONTS — erken return YOK; UI’ı koşullu çizeceğiz
+  const [fontsLoaded] = useFonts({
+    Helvetica: require('../../../assets/fonts/helvetica.ttf'),
+  });
+
+  
+  // 4) KLAVYE ANİMASYONU — hook sabit, sadece içeride koşul
   const animateTo = useCallback((to) => {
     Animated.timing(anim, {
-      toValue: to, duration: 220,
+      toValue: to,
+      duration: 220,
       easing: Easing.out(Easing.quad),
       useNativeDriver: false,
     }).start();
@@ -68,19 +71,10 @@ export default function SignupStudentScreen({ navigation }) {
     return () => { sh.remove(); hd.remove(); };
   }, [animateTo]);
 
-  const topHeight = anim.interpolate({ inputRange: [0,1], outputRange: [TOP_BIG_H, TOP_SMALL_H] });
-  const logoScale = anim.interpolate({ inputRange: [0,1], outputRange: [1, LOGO_MIN_SCALE] });
+  const topHeight = anim.interpolate({ inputRange: [0, 1], outputRange: [TOP_BIG_H, TOP_SMALL_H] });
+  const logoScale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, LOGO_MIN_SCALE] });
 
-
-
-  const [firstName, setFirstName] = useState('');
-  const [lastName,  setLastName]  = useState('');
-  const [studentNo, setStudentNo] = useState('');
-  const [dept,      setDept]      = useState(DEPARTMENTS[0]);
-  const [email,     setEmail]     = useState('');
-  const [pass,      setPass]      = useState('');
-  const [busy,      setBusy]      = useState(false);
-
+  // 5) FORM DOĞRULAMALARI
   const isErciyesMail = (m) => m?.trim().toLowerCase().endsWith('@erciyes.edu.tr');
   const is10Digits    = (s) => /^\d{10}$/.test(s);
 
@@ -102,11 +96,11 @@ export default function SignupStudentScreen({ navigation }) {
 
   const mapAuthError = (code) => {
     switch (code) {
-      case 'auth/email-already-in-use': return 'Bu e-posta ile zaten bir hesap var.';
-      case 'auth/invalid-email':        return 'E-posta geçersiz.';
-      case 'auth/weak-password':        return 'Şifre zayıf (min 6).';
+      case 'auth/email-already-in-use':   return 'Bu e-posta ile zaten bir hesap var.';
+      case 'auth/invalid-email':          return 'E-posta geçersiz.';
+      case 'auth/weak-password':          return 'Şifre zayıf (min 6).';
       case 'auth/network-request-failed': return 'Ağ hatası. İnterneti kontrol et.';
-      default: return 'Beklenmeyen bir hata oluştu.';
+      default:                            return 'Beklenmeyen bir hata oluştu.';
     }
   };
 
@@ -121,32 +115,21 @@ export default function SignupStudentScreen({ navigation }) {
       const L = lastName.trim();
       const S = studentNo.trim();
 
-      // 1) Firebase Auth hesabını oluştur
+      // 1) Firebase Auth
       const { user } = await createUserWithEmailAndPassword(auth, E, pass);
       const uid = user.uid;
 
-      // 2) Firestore — DOĞRU PATH: students/{uid}
-      /*const studentDoc = {
-        uid,
-        role: 'student',
+      // 2) Firestore — students/{uid}
+      await saveStudent(uid, {
         firstName: F,
         lastName: L,
         fullName: `${F} ${L}`,
-        studentNo: S,            // string, baştaki 0'lar korunur
+        studentNo: S,
         department: dept,
         email: E,
-        createdAt: serverTimestamp(),
-      };*/
-     // await setDoc(doc(db, 'students', uid), studentDoc);
-          await saveStudent(user.uid, {
-      firstName: F,
-      lastName: L,
-      fullName: `${F} ${L}`,
-      studentNo: S,
-      department: dept,
-      email: E,
-    });
-      // (Opsiyonel) genel users/{uid} koleksiyonuna özet yaz
+      });
+
+      // 3) users/{uid} özet
       await setDoc(doc(db, 'users', uid), {
         uid,
         role: 'student',
@@ -154,9 +137,8 @@ export default function SignupStudentScreen({ navigation }) {
         fullName: `${F} ${L}`,
         createdAt: serverTimestamp(),
       }, { merge: true });
-      
+
       Alert.alert('Başarılı', 'Öğrenci kaydı oluşturuldu.');
-      // RoleSelectScreen zaten students/{uid} varlığını kontrol edip StudentHome’a alacak
       navigation.replace('LoginStudent');
     } catch (e) {
       const msg = mapAuthError(e?.code) + (e?.code ? ` [${e.code}]` : '');
@@ -167,14 +149,15 @@ export default function SignupStudentScreen({ navigation }) {
     }
   };
 
+  // 6) ERKEN RETURN YOK — sadece UI’ı koşullu çiz
   return (
     <SafeAreaView style={styles.safe}>
-      {/* ÜST status bar beyaz — ikonlar koyu */}
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-       {/* Sol üst rozet */}
+
+      {/* Sol üst rozet */}
       <Image source={require('../../../assets/Logo1.png')} style={styles.cornerBadge} resizeMode="contain" />
-      
-      {/* Üst beyaz alan — KISALTILDI */}
+
+      {/* Üst beyaz alan */}
       <Animated.View style={[styles.topBox, { height: topHeight }]}>
         <Animated.View style={[styles.logoCard, { transform: [{ scale: logoScale }], zIndex: 2 }]}>
           <Image source={require('../../../assets/checkLogo.jpg')} style={styles.logo} resizeMode="contain" />
@@ -184,40 +167,68 @@ export default function SignupStudentScreen({ navigation }) {
         <View style={styles.shadowEdge} />
       </Animated.View>
 
-       {/* Form alanı (NAVY) */}
+      {/* Form alanı (NAVY) */}
       <View style={styles.formBackground}>
-      <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <View style={styles.wrap}>
-            <Text style={styles.title}>Öğrenci Kayıt</Text>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+            <View style={styles.wrap}>
+              <Text style={styles.title}>Öğrenci Kayıt</Text>
 
-            <TextInput style={styles.input} placeholder="Ad *"
-              value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
-            <TextInput style={styles.input} placeholder="Soyad *"
-              value={lastName} onChangeText={setLastName} autoCapitalize="words" />
-            <TextInput style={styles.input} placeholder="Öğrenci No (10 hane) *"
-              value={studentNo}
-              onChangeText={(t)=> setStudentNo((t||'').replace(/[^\d]/g,''))}
-              keyboardType="number-pad" maxLength={10} />
+              <TextInput
+                style={styles.input}
+                placeholder="Ad *"
+                value={firstName}
+                onChangeText={setFirstName}
+                autoCapitalize="words"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Soyad *"
+                value={lastName}
+                onChangeText={setLastName}
+                autoCapitalize="words"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Öğrenci No (10 hane) *"
+                value={studentNo}
+                onChangeText={(t) => setStudentNo((t || '').replace(/[^\d]/g, ''))}
+                keyboardType="number-pad"
+                maxLength={10}
+              />
 
-            <View style={styles.pickerBox}>
-              <Picker selectedValue={dept} onValueChange={setDept}>
-                {DEPARTMENTS.map((d)=> (<Picker.Item key={d} label={d} value={d}/>))}
-              </Picker>
+              <View style={styles.pickerBox}>
+                <Picker selectedValue={dept} onValueChange={setDept}>
+                  {DEPARTMENTS.map((d) => (<Picker.Item key={d} label={d} value={d} />))}
+                </Picker>
+              </View>
+
+              <TextInput
+                style={styles.input}
+                placeholder="E-posta (@erciyes.edu.tr) *"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Şifre (min 6 karakter) *"
+                value={pass}
+                onChangeText={setPass}
+                secureTextEntry
+              />
+
+              <TouchableOpacity
+                style={[styles.btn, (!formValid || busy) && styles.btnDisabled]}
+                onPress={handleSignup}
+                disabled={!formValid || busy}
+              >
+                <Text style={styles.btnText}>{busy ? '...' : 'Kaydol'}</Text>
+              </TouchableOpacity>
             </View>
-
-            <TextInput style={styles.input} placeholder="E-posta (@erciyes.edu.tr) *"
-              value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
-            <TextInput style={styles.input} placeholder="Şifre (min 6 karakter) *"
-              value={pass} onChangeText={setPass} secureTextEntry />
-
-            <TouchableOpacity style={[styles.btn, (!formValid || busy) && styles.btnDisabled]}
-              onPress={handleSignup} disabled={!formValid || busy}>
-              <Text style={styles.btnTxt}>{busy ? '...' : 'Kaydol'}</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );
@@ -238,7 +249,6 @@ const styles = StyleSheet.create({
     overflow: 'visible',
   },
 
-  // Logo kartı biraz küçültüldü
   logoCard: {
     width: CARD_SIZE,
     height: CARD_SIZE,
@@ -255,19 +265,19 @@ const styles = StyleSheet.create({
 
   logo: { width: '60%', height: '60%', marginBottom: 0 },
 
-  circleTitle:   { fontFamily: 'Helvetica', fontSize: 22, color: NAVY, marginTop: -14 },
-  circleSubtitle:{ fontFamily: 'Helvetica', fontSize: 16, color: NAVY, marginTop: -8 },
+  circleTitle:    { fontFamily: 'Helvetica', fontSize: 22, color: NAVY, marginTop: -14 },
+  circleSubtitle: { fontFamily: 'Helvetica', fontSize: 16, color: NAVY, marginTop: -8 },
 
-
-title: {
+  title: {
     fontFamily: 'Helvetica',
     fontSize: 22,
     fontWeight: '700',
     color: '#fff',
     marginBottom: 12,
-    textAlign: 'center',     // ← metni ortalar
-    alignSelf: 'center',     // ← Text bileşenini ortalar
+    textAlign: 'center',
+    alignSelf: 'center',
   },
+
   shadowEdge: {
     position: 'absolute',
     left: 0, right: 0, bottom: -10,
@@ -283,14 +293,10 @@ title: {
     zIndex: 1,
   },
 
-  formScroll: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 24,
-  },
-   input: {
+  scroll: { flexGrow: 1, padding: 24 },
+  wrap:   { alignItems: 'center' },
+
+  input: {
     width: FIELD_WIDTH,
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -306,17 +312,14 @@ title: {
     elevation: 2,
   },
 
-  row: {
+  pickerBox: {
     width: FIELD_WIDTH,
-    marginTop: 12,
-    marginBottom: 6,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginTop: 8,
+    overflow: 'hidden',
   },
-
-  rememberTxt: { fontFamily: 'Helvetica', marginLeft: 8, color: '#fff' },
-  resetTxt:    { fontFamily: 'Helvetica', color: '#fff', fontWeight: '700' },
 
   btn: {
     width: Math.min(width * 0.80, 360),
@@ -326,30 +329,22 @@ title: {
     alignItems: 'center',
     marginVertical: 13,
   },
-  btnText: { fontFamily: 'Helvetica', color: NAVY, fontWeight: '700', fontSize: 16 },
-
-  linkBtn: { marginTop: 14, alignItems: 'center' },
-  linkTxt: { fontFamily: 'Helvetica', color: '#fff', fontWeight: '700' },
-
-
-
- // 4) Picker kutusu — genişlik ve merkez
-  pickerBox: {
-    width: FIELD_WIDTH,        // ← kritik
-    alignSelf: 'center',       // ← ortada kalsın
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginTop: 8,
-    overflow: 'hidden',
-    
+  btnText: {
+    fontFamily: 'Helvetica',
+    color: NAVY,
+    fontWeight: '700',
+    fontSize: 16
   },
-    
-    
-    scroll: { flexGrow: 1, padding: 24 },
-  wrap:   {  alignItems:'center'},
-  //title:  { fontSize: 22, fontWeight: '700', marginBottom: 12 },
- // input:  { backgroundColor:'#fff', borderRadius:10, padding:12, marginTop:8 },
-  //btn:    { backgroundColor:'#0782F9', padding:14, borderRadius:10, marginTop:14, alignItems:'center' },
   btnDisabled: { opacity: 0.5 },
-  //btnTxt: { color:'#fff', fontWeight:'700' },
+
+  rememberTxt: { fontFamily: 'Helvetica', marginLeft: 8, color: '#fff' },
+  resetTxt:    { fontFamily: 'Helvetica', color: '#fff', fontWeight: '700' },
+  row: {
+    width: FIELD_WIDTH,
+    marginTop: 12,
+    marginBottom: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
 });

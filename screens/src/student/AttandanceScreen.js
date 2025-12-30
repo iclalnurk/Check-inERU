@@ -1,6 +1,6 @@
 // ...existing code...
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image, TouchableOpacity, StatusBar, Dimensions, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { auth, db } from '../../../firebase';
@@ -12,7 +12,7 @@ const { width } = Dimensions.get('window');
 const NAVY = '#0b1f3b';
 const MINI_CARD = Math.min(width * 0.38, 160);
 
-export default function AcademicHome({ navigation }) {
+export default function AttandanceScreen({ navigation }) {
   const [fontsLoaded] = useFonts({ Helvetica: require('../../../assets/fonts/helvetica.ttf') });
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -22,10 +22,10 @@ export default function AcademicHome({ navigation }) {
       try {
         const user = auth.currentUser;
         if (user) {
-          const snap = await getDoc(doc(db, 'academics', user.uid));
+          const snap = await getDoc(doc(db, 'students', user.uid));
           if (snap.exists()) {
             const d = snap.data();
-            setName(d.name || d.fullName || 'Akademisyen');
+            setName(d.name || d.fullName || 'Öğrenci');
           }
         }
       } catch (e) {
@@ -43,15 +43,6 @@ export default function AcademicHome({ navigation }) {
       </View>
     );
   }
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigation.replace('RoleSelect');
-    } catch (e) {
-      console.log('Çıkış hatası:', e);
-    }
-  };
 
   return (
     <SafeAreaView style={styles.root}>
@@ -74,19 +65,15 @@ export default function AcademicHome({ navigation }) {
 
       <View style={styles.bottomBox}>
         <Text style={styles.greeting}>Merhaba, {name} 👋</Text>
-        <Text style={styles.subText}>Check-inERU’ya hoş geldin.</Text>
+        <Text style={styles.subText}>Devamsızlık bilgilerin aşağıda.</Text>
 
-        <View style={styles.cardRow}>
-          <TouchableOpacity style={styles.squareCard} onPress={() => navigation.navigate('ScheduleAcademic')}>
-            <Ionicons name="calendar-outline" size={40} color={NAVY} />
-            <Text style={styles.cardText}> Ders Programı</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.squareCard} onPress={() => navigation.navigate('AttandanceAcademic')}>
-            <Ionicons name="clipboard-outline" size={40} color={NAVY} />
-            <Text style={styles.cardText}>Devamsızlık Bilgisi</Text>
-          </TouchableOpacity>
-        </View>
+        <ScrollView style={{ width: '100%', marginTop: 20, paddingHorizontal: 24 }}>
+          {/* Buraya gerçek devamsızlık verilerini ekleyin */}
+          <View style={{ backgroundColor: '#fff', padding: 18, borderRadius: 12 }}>
+            <Text style={{ fontFamily: 'Helvetica', fontSize: 16, color: NAVY, fontWeight: '700' }}>Genel Devamsızlık</Text>
+            <Text style={{ fontFamily: 'Helvetica', marginTop: 8, color: '#475569' }}>Bu alanı backend'den gelen verilerle doldurun.</Text>
+          </View>
+        </ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -175,32 +162,4 @@ const styles = StyleSheet.create({
     color: '#dbe3f0',
   },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
-    marginTop: 40,
-    marginBottom: 25,
-  },
-  squareCard: {
-    backgroundColor: '#f3f4f6',
-    width: '46%',
-    aspectRatio: 1,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-  },
-  cardText: {
-    fontFamily: 'Helvetica',
-    color: NAVY,
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 8,
-    textAlign: 'center',
-  },
 });
