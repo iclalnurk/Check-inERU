@@ -28,3 +28,7 @@ fire-upload/
 *.key
 .env
 .env.*
+
+firebase.js
+.env
+.env.*
