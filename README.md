@@ -24,7 +24,6 @@ Bu proje aşağıdaki teknolojilerle geliştirilmiştir:
 ---
 
 ## 📁 Proje Yapısı
-“.env.example dosyasını .env olarak kopyalayın ve değerleri doldurun.”
 
  
  
@@ -35,6 +34,13 @@ Bu proje aşağıdaki teknolojilerle geliştirilmiştir:
 <img width="403" height="854" alt="image" src="https://github.com/user-attachments/assets/37069f2d-af02-4e87-b7e7-b62c0cd69993" />
 <img width="392" height="861" alt="image" src="https://github.com/user-attachments/assets/9d443d7b-2a73-461b-84f5-15dd49079036" />
 <img width="403" height="862" alt="image" src="https://github.com/user-attachments/assets/860481e9-430f-42cd-839e-c1c0bb831e56" />
+
+## Environment Variables
+
+Create a `.env` file in the project root (do not commit it). You can copy the template:
+
+```bash
+cp .env.example .env
 
 
 
