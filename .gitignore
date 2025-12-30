@@ -21,3 +21,10 @@ yarn-error.log*
 Thumbs.db
 .vscode/
 .idea/
+# Secrets / keys
+fire-upload/
+**/serviceAccountKey.json
+*.pem
+*.key
+.env
+.env.*
